@@ -2,7 +2,7 @@
 // Deploy on Vercel — receives GHL webhook, creates customer/jobs/quotes in Squeegee
 
 const SQUEEGEE_BASE = 'https://kingswindowcleaning.sqgee.com';
-const SQUEEGEE_TOKEN = process.env.SQUEEGEE_TOKEN || 'VIRPA-9cadf8b7-0544-491f-b183-8e91bc50987d';
+const SQUEEGEE_TOKEN = process.env.SQUEEGEE_TOKEN || 'PARTNER-8f51e35c-a366-4cc6-9f73-d26152ca81a6';
 
 // ─── Service Map ──────────────────────────────────────────────────────────────
 const SERVICE_MAP = [
@@ -217,3 +217,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ success: false, error: err.message });
   }
 }
+
