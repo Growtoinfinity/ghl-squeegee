@@ -73,7 +73,9 @@ function extractInterval(name) {
 function parseBookedServices(text) {
   if (!text) return [];
   const results = [];
-  for (const line of text.split('\n')) {
+  // handle both real newlines and literal \n from GHL
+  const lines = text.split(/\\n|\n/);
+  for (const line of lines) {
     const match = line.match(/^(.+?)\s*[-–]\s*£?([\d,]+(?:\.\d{1,2})?)\s*$/);
     if (match) {
       results.push({ name: match[1].trim(), price: parseFloat(match[2].replace(',', '')) });
