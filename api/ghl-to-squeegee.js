@@ -94,12 +94,17 @@ function buildJob(serviceId, date, price, frequencyInterval) {
   return payload;
 }
 
-function buildQuote(serviceId, price, frequencyInterval) {
+function buildQuote(serviceId, price, frequencyInterval, date) {
   const payload = {
     services: [serviceId],
     tags: ['quote'],
     price,
+    notes: 'Quote',
     frequencyType: frequencyInterval ? 'weeks' : 'adhoc',
+    firstAppointment: {
+      tags: ['first-visit'],
+      initialDate: date,
+    },
   };
   if (frequencyInterval) payload.frequencyInterval = frequencyInterval;
   return payload;
@@ -183,7 +188,7 @@ export default async function handler(req, res) {
       } else {
         const quoteRes = await squeegeePost(
           `/api/v3/partner/customers/${customerId}/quote`,
-          buildQuote(EXTERNAL_WINDOW_ID, freq.price, freq.interval)
+          buildQuote(EXTERNAL_WINDOW_ID, freq.price, freq.interval, date)
         );
         log.push({ type: 'quote', service: 'external_window', interval: freq.interval, id: quoteRes.data });
       }
@@ -205,7 +210,7 @@ export default async function handler(req, res) {
       } else {
         const quoteRes = await squeegeePost(
           `/api/v3/partner/customers/${customerId}/quote`,
-          buildQuote(service.id, price, null)
+          buildQuote(service.id, price, null, date)
         );
         log.push({ type: 'quote', service: service.key, id: quoteRes.data });
       }
