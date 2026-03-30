@@ -87,8 +87,13 @@ function buildJob(serviceId, date, price, frequencyInterval) {
     date,
     services: [serviceId],
     price,
+    notes: 'Booked job',
+    tags: ['booked'],
     frequencyType: frequencyInterval ? 'weeks' : 'adhoc',
-    firstAppointment: { tags: ['first-visit'], initialDate: date },
+    firstAppointment: {
+      tags: ['first-visit'],
+      initialDate: date,
+    },
   };
   if (frequencyInterval) payload.frequencyInterval = frequencyInterval;
   return payload;
