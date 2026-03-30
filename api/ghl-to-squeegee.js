@@ -154,7 +154,6 @@ export default async function handler(req, res) {
       email: c.email,
       phone: c.phone,
       address: { text: c.address__postal_code },
-      notes: c.booking_bot_summary,
       reference: c.id,
     };
 
