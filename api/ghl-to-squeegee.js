@@ -68,6 +68,13 @@ function parseDate(raw) {
   return new Date().toISOString().split('T')[0];
 }
 
+function parseTimeOfDay(raw) {
+  if (!raw) return '';
+  if (/\bAM\b/i.test(raw)) return '#!MORNING';
+  if (/\bPM\b/i.test(raw)) return '#!AFTERNOON-NEW';
+  return '';
+}
+
 function parsePrice(val) {
   if (val === null || val === undefined || val === '') return null;
   const num = parseFloat(String(val).replace(/[£$,\s]/g, ''));
@@ -98,12 +105,12 @@ function parseBookedServices(text) {
   return results;
 }
 
-function buildJob(serviceId, date, price, frequencyInterval) {
+function buildJob(serviceId, date, price, frequencyInterval, notes) {
   const payload = {
     date,
     services: [serviceId],
     price,
-    notes: 'Booked job',
+    notes: notes || 'Booked job',
     tags: ['booked'],
     frequencyType: frequencyInterval ? 'weeks' : 'adhoc',
     firstAppointment: {
@@ -179,6 +186,7 @@ export default async function handler(req, res) {
 
     // ── Parse shared data ────────────────────────────────────────────────────
     const date = parseDate(c.appointment_time_requested);
+    const timeOfDay = parseTimeOfDay(c.appointment_time_requested);
     const bookedServices = parseBookedServices(c.booked_services_array);
 
     // ── 2. External Window Cleaning ──────────────────────────────────────────
@@ -202,7 +210,7 @@ export default async function handler(req, res) {
       if (isBooked) {
         const jobRes = await squeegeePost(
           `/api/v3/partner/customers/${customerId}/jobs`,
-          buildJob(EXTERNAL_WINDOW_ID, date, freq.price, freq.interval)
+          buildJob(EXTERNAL_WINDOW_ID, date, freq.price, freq.interval, timeOfDay)
         );
         log.push({ type: 'job', service: 'external_window', interval: freq.interval, id: jobRes.data });
       } else {
@@ -224,7 +232,7 @@ export default async function handler(req, res) {
       if (isBooked) {
         const jobRes = await squeegeePost(
           `/api/v3/partner/customers/${customerId}/jobs`,
-          buildJob(service.id, date, price, null)
+          buildJob(service.id, date, price, null, timeOfDay)
         );
         log.push({ type: 'job', service: service.key, id: jobRes.data });
       } else {
