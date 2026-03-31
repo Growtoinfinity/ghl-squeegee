@@ -45,13 +45,27 @@ const EXTERNAL_WINDOW_KEYWORDS = ['external window', 'window clean', 'outside wi
 
 function parseDate(raw) {
   if (!raw) return new Date().toISOString().split('T')[0];
-  const cleaned = raw
-    .replace(/(\d+)(st|nd|rd|th)/gi, '$1')
-    .replace(/,?\s*(AM|PM)\s*$/i, '')
-    .trim();
+
+  // Remove day names (Monday, Tuesday etc)
+  let cleaned = raw.replace(/^[A-Za-z]+,\s*/, '');
+  // Remove AM/PM and & AM/PM
+  cleaned = cleaned.replace(/[&,]?\s*(AM|PM)\s*$/i, '').trim();
+
+  // Format 1: "07-04-2026" (DD-MM-YYYY)
+  const ddmmyyyy = cleaned.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  if (ddmmyyyy) {
+    return `${ddmmyyyy[3]}-${ddmmyyyy[2]}-${ddmmyyyy[1]}`;
+  }
+
+  // Format 2: "2nd April, 2026" (ordinal date)
+  cleaned = cleaned.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
   const parsed = new Date(cleaned);
-  if (isNaN(parsed.getTime())) return new Date().toISOString().split('T')[0];
-  return parsed.toISOString().split('T')[0];
+  if (!isNaN(parsed.getTime())) {
+    return parsed.toISOString().split('T')[0];
+  }
+
+  console.warn('Could not parse date:', raw);
+  return new Date().toISOString().split('T')[0];
 }
 
 function parsePrice(val) {
